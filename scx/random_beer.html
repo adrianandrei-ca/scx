@@ -42,7 +42,7 @@
 			}
 			while (i < page.result.length) {
 				i = pickNextBeer(i + 1, page.result);
-				if (rand(count+1) == count) {
+				if (i < page.result.length && rand(count+1) == count) {
 					pick = page.result[i];
 					hits++;
 				}
