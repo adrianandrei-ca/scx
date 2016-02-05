@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  
+    <title>SCX Coding Challenge</title>
+    <script>
+	  var pick;
+	  var count = 0;
+	  var hits = 0;
+	  
+	  function isArray(obj) {
+		return Object.prototype.toString.call(obj) === '[object Array]';
+      }
+	  
+	  function rand(n) {
+		return Math.floor((Math.random() * n)); 
+	  }
+	  
+	  function pickNextBeer(start, beers) {
+		for(var i = start; i < beers.length; i++) {
+			if (!beers[i].is_discontinued && !beers[i].is_dead) {
+				return i;
+			}
+		}
+		return beers.length;
+	  }
+	  
+	  function pickPageBeer(page) {
+		var i = 0;
+		var cand;
+		
+		$('#beer').html('' + (page.pager.total_pages - page.pager.current_page) + ' ...');
+		if (page != null && isArray(page.result) && page.result.length > 0) {
+			if (count == 0) {
+				i = pickNextBeer(0, page.result);
+				if (i < page.result.length) {
+					count++;
+					pick = page.result[i++];
+				}
+			}
+			while (i < page.result.length) {
+				i = pickNextBeer(i + 1, page.result);
+				if (rand(count+1) == count) {
+					pick = page.result[i];
+					hits++;
+				}
+				count++;
+			}
+			
+			if (!page.pager.is_final_page) {
+				pickRandomBeerURI(page.pager.next_page_path);
+			} else {
+				$('#beer').html(pick.name);
+			}
+		}
+	  }
+	  
+	  function pickRandomBeerURI(page) {
+	    $.ajax({
+			url: 'http://lcboapi.com' + page,
+			dataType: 'jsonp'
+		}).then(function(data) {
+			//console.log(data);
+			if (data.status == 200) {
+				pickPageBeer(data);
+			} else {
+				$('#error').html('Error status:' + data.status
+					+ ' : ' + data.message);
+			}
+		});
+	  }
+	  
+	  function pickRandomBeer(){
+		count = 0;
+		pick = null;
+		$('#beer').html('Mike sux...');
+		$('#error').html('');
+		pickRandomBeerURI('/products?q=beer&store_id=511');
+	  }
+	  
+    </script>
+  </head>
+  <body>
+    <h2 id="beer"></h2>
+	<input id="pick" value="Pick random sample" type="button" onclick="pickRandomBeer()"/>
+	<div id="error"></div>
+  </body>
+</html>
