@@ -52,6 +52,7 @@
 			if (!page.pager.is_final_page) {
 				pickRandomBeerURI(page.pager.next_page_path);
 			} else {
+				//appendBeer(pick.name);
 				$('#beer').html(pick.name);
 			}
 		}
@@ -69,21 +70,51 @@
 				$('#error').html('Error status:' + data.status
 					+ ' : ' + data.message);
 			}
+			//console.log(data.pager.current_page);
 		});
 	  }
 	  
 	  function pickRandomBeer(){
 		count = 0;
 		pick = null;
-		$('#beer').html('Mike sux...');
+		var lastBeer = $('#beer').text();
+		if (lastBeer != '')
+			appendBeer(lastBeer);
+		$('#beer').html('');
 		$('#error').html('');
 		pickRandomBeerURI('/products?q=beer&store_id=511');
+	  }
+	  
+	  function appendBeer(name) {
+		var currentDate = new Date()
+		var day = currentDate.getDate()
+		var month = currentDate.getMonth() + 1
+		var year = currentDate.getFullYear();
+		if (month < 10) {
+			month = '0' + month;
+		}
+		if (day < 10) {
+			day = '0' + day;
+		}
+		var newBeer = document.createElement('li');
+		var content = document.createTextNode(name + ' ' + year + '/' + month + '/' + day);
+		newBeer.appendChild(content);
+		
+		var list = $('#container');
+		list.prepend(newBeer);
+		var len = $('#container li').length;
+		if (len > 10) {
+			$('li:last-child', list).remove();
+		}
 	  }
 	  
     </script>
   </head>
   <body>
     <h2 id="beer"></h2>
+	Previous selections:
+    <ol id='container'>
+    </ol>
 	<input id="pick" value="Pick random sample" type="button" onclick="pickRandomBeer()"/>
 	<div id="error"></div>
   </body>
